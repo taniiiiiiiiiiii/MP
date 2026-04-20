@@ -1,0 +1,90 @@
+DATA SEGMENT 
+str DB 20 DUP(?)            ; buffer for string
+n DB ?                      ; length of string
+
+M1 DB 10,13,'ENTER STRING: $'
+M2 DB 10,13,'PALINDROME $'
+M3 DB 10,13,'NOT PALINDROME$'
+DATA ENDS 
+
+CODE SEGMENT 
+ASSUME CS:CODE, DS:DATA
+
+START:
+MOV AX, DATA
+MOV DS, AX
+
+LEA SI, str                 ; SI → start of string
+
+LEA DX, M1
+MOV AH, 09H
+INT 21H                     ; print message
+
+CALL READSTRING             ; read string (length in CL)
+
+MOV n, CL                   ; store length
+
+LEA SI, str                 ; SI → first character
+MOV CH, 00H                 ; clear CH (so CX holds length)
+MOV CL, n                   
+DEC CL                      ; CL = last index
+
+LEA DI, str
+ADD DI, CX                  ; DI → last character
+
+; -------- Compare from both ends --------
+
+CHECK:
+CMP SI, DI                  ; crossed pointers?
+JGE PAL                     ; if yes → palindrome
+
+MOV AL, [SI]                ; first character
+CMP AL, [DI]                ; compare with last
+JNZ NOTPAL                  ; if mismatch → not palindrome
+
+INC SI                      ; move forward
+DEC DI                      ; move backward
+JMP CHECK                   ; repeat
+
+; -------- Not Palindrome --------
+
+NOTPAL:
+LEA DX, M3
+MOV AH, 09H
+INT 21H
+JMP EXIT
+
+; -------- Palindrome --------
+
+PAL:
+LEA DX, M2
+MOV AH, 09H
+INT 21H
+
+EXIT:
+MOV AH, 4CH
+INT 21H
+
+; -------- Read String --------
+
+READSTRING PROC
+MOV CL, 00H
+
+UP:
+MOV AH, 01H
+INT 21H
+
+CMP AL, 0DH                 ; Enter key?
+JZ DONE
+
+MOV [SI], AL
+INC SI
+INC CL
+JMP UP
+
+DONE:
+RET
+READSTRING ENDP
+
+CODE ENDS
+END START
