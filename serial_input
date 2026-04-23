@@ -1,0 +1,62 @@
+char rx_byte = 0;      // Stores each received character
+int count;             // Stores number of 1's
+int len = 0;           // Stores length of input
+
+void setup() {
+  Serial.begin(9600); // Initialize serial communication
+}
+
+void loop() {
+
+  count = 0;  // Reset count
+  len = 0;    // Reset length
+
+  Serial.println("Enter the 8-bit boolean input:");
+
+  // -------- INPUT LOOP --------
+  while (1) {
+    if (Serial.available() > 0) {
+
+      rx_byte = Serial.read();   // Read one character
+      Serial.print(rx_byte);     // Echo it back
+      len++;                     // Increase length
+
+      if (rx_byte == '1') {
+        count++;                 // Count number of 1's
+      }
+      else if (rx_byte == '\n') {
+        len--;                   // Remove Enter from length
+        break;                   // Exit input loop
+      }
+    }
+  }
+
+  // -------- RESULT CHECK --------
+  if (len == 8) {
+
+    if ((count % 2) == 0 && count != 0) {
+      Serial.println("\nEven number of 1's");
+    }
+    else if ((count % 2) != 0 && count != 0) {
+      Serial.println("\nOdd number of 1's");
+    }
+    else {
+      Serial.println("\nEntered input does not have 1's");
+    }
+
+    Serial.print("Number of 1's in the input: ");
+    Serial.println(count);
+
+    Serial.print("Length of the input: ");
+    Serial.println(len);
+
+    Serial.println("________________________________________");
+  }
+  else {
+    Serial.print("\nLength of the input: ");
+    Serial.println(len);
+
+    Serial.println("NOT 8-BITS");
+    Serial.println("________________________________________");
+  }
+}
